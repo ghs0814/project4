@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.project4.mapper.ProductMapper">
+
+    <!-- 전체 조회 -->
+    <select id="findAll"
+            resultType="com.example.project4.domain.Product">
+
+        SELECT
+        product_id,
+        name,
+        price,
+        stock_quantity,
+        created_at
+        FROM products
+        ORDER BY product_id DESC
+
+    </select>
+
+    <!-- 상세 조회 -->
+    <select id="findById"
+            resultType="com.example.project4.domain.Product">
+        SELECT
+        product_id,
+        name,
+        price,
+        stock_quantity,
+        created_at
+        FROM products
+        WHERE
+            product_id = #{productId}
+
+    </select>
+
+   <!-- 등록 -->
+    <insert id="insert"
+            parameterType="com.example.project4.dto.ProductRequestDto"
+            useGeneratedKeys="true"
+            keyProperty="productId"
+            keyColumn="product_id"
+    >
+        INSERT INTO PRODUCTS(
+            name,
+            price,
+            stock_quantity
+        )
+        VALUES(
+            #{name},
+            #{price},
+            #{stockQuantity}
+        )
+
+    </insert>
+    <!-- 수정 -->
+    <update id="update"
+        parameterType="com.example.project4.dto.ProductRequestDto"
+    >
+        UPDATE PRODUCTS
+        SET
+            name = #{name},
+            price = #{price},
+            stock_quantity=#{stockQuantity}
+        WHERE
+            priduct_id = #{productId}
+
+
+
+    </update>
+    <!-- 삭제 -->
+    <delete id="delete">
+        DELETE FROM PRODUCTS
+        WHERE
+            product_id = #{productId}
+
+    </delete>
+
+    <!-- 재고 차감-->
+    <update id="decreaseStock">
+        UPDATE products
+        SET stock_quantity = stock_quantity- #{quantity}
+        WHERE product_id = #{productId}
+            AND stock_quantity >= #{quantity}
+    </update>
+
+    <update id="increaseStock">
+        UPDATE products
+        SET stock_quantity = stock_quantity + #{quantity}
+        WHERE product_id = #{productId}
+
+    </update>
+</mapper>

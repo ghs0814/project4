@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.project4.mapper.SalesMapper">
+
+    <!-- 전체 매출 조회(수량, 총액) -->
+    <select id="findSummary"
+            resultType="com.example.project4.dto.SalesSummaryDto">
+
+        SELECT
+        COUNT(*) AS order_count,
+        COALESCE(SUM(total_amount), 0) AS total_sales
+        FROM orders
+        WHERE status = 'ORDERED'
+
+    </select>
+
+    <!-- 상품별 매출 조회 -->
+    <select id="findProductSales"
+            resultType="com.example.project4.dto.ProductSalesDto">
+
+        SELECT
+        p.product_id,
+        p.name AS product_name,
+        SUM(oi.quantity) AS total_quantity,
+        SUM(oi.quantity * oi.unit_price) AS total_sales
+        FROM order_items oi
+        JOIN orders o
+        ON oi.order_id = o.order_id
+        JOIN products p
+        ON oi.product_id = p.product_id
+        WHERE o.status = 'ORDERED'
+        GROUP BY
+        p.product_id,
+        p.name
+        ORDER BY total_sales DESC, p.product_id ASC
+
+    </select>
+
+</mapper>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.project4.mapper.OrderMapper">
+
+    <!-- 주문 기본 정보 등록 -->
+    <insert id="insert"
+            parameterType="com.example.project4.domain.Order"
+            useGeneratedKeys="true"
+            keyProperty="orderId"
+            keyColumn="order_id">
+
+        INSERT INTO orders (
+        customer_id,
+        total_amount,
+        status
+        )
+        VALUES (
+        #{customerId},
+        #{totalAmount},
+        #{status}
+        )
+
+    </insert>
+
+    <!-- 주문 상품 등록 -->
+    <insert id="insertItem"
+            parameterType="com.example.project4.domain.OrderItem"
+            useGeneratedKeys="true"
+            keyProperty="orderItemId"
+            keyColumn="order_item_id">
+
+        INSERT INTO order_items (
+        order_id,
+        product_id,
+        quantity,
+        unit_price
+        )
+        VALUES (
+        #{orderId},
+        #{productId},
+        #{quantity},
+        #{unitPrice}
+        )
+
+    </insert>
+
+    <!-- 주문 기본 정보 조회 -->
+    <select id="findById"
+            resultType="com.example.project4.domain.Order">
+
+        SELECT
+        order_id,
+        customer_id,
+        total_amount,
+        status,
+        created_at
+        FROM orders
+        WHERE order_id = #{orderId}
+
+    </select>
+
+    <sql id = "searchConditions">
+        <where>
+            <if test="customerId != null">
+                AND o.customer_id = #{customerId}
+            </if>
+
+            <if test="status != null">
+                AND o.status = #{status}
+            </if>
+        </where>
+
+    </sql>
+
+    <select id="findAll"
+            resultType="com.example.project4.domain.Order">
+        SELECT
+            o.order_id,
+            o.customer_id,
+            c.name AS customer_name,
+            o.total_amount,
+            o.status,
+            o.created_at
+        FROM orders o
+        JOIN customers c
+            ON o.customer_id = c.customer_id
+
+        <include refid="searchConditions"/>
+
+        <choose>
+            <when test="sort == 'oldest'">
+                ORDER BY o.order_id ASC
+            </when>
+            <otherwise>
+                ORDER BY o.order_id DESC
+            </otherwise>
+        </choose>
+
+
+        LIMIT #{size}
+        OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*)
+        FROM orders o
+        <include refid="searchConditions"/>
+
+    </select>
+
+    <select id="findItemsByOrderId"
+            resultType="com.example.project4.domain.OrderItem">
+
+        SELECT
+        oi.order_item_id,
+        oi.order_id,
+        oi.product_id,
+        p.name AS product_name,
+        oi.quantity,
+        oi.unit_price
+        FROM order_items oi
+        JOIN products p
+        ON oi.product_id = p.product_id
+        WHERE oi.order_id = #{orderId}
+        ORDER BY oi.order_item_id
+    </select>
+
+    <update id="cancel">
+        UPDATE orders
+        SET status='CANCELED'
+        WHERE order_id = #{orderId}
+            AND status='ORDERED'
+
+    </update>
+</mapper>

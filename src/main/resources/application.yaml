@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: project4
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/project4
+    username: project4
+    password: ${DB_PASSWORD}
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
